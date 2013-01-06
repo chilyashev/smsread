@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (C) 2012 Mihail Chilyashev
+ * Copyright (C) 2013 Mihail Chilyashev
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
