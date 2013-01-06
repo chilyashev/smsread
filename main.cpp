@@ -36,14 +36,13 @@ using namespace std;
 
 FILE *fdr, *fdw;
 int fd;
-struct termio term_save, stdin_save;
+struct termio term_save;
 
 void endItAll(int sig) {
     if (fdr) fclose(fdr);
     if (fdw) fclose(fdw);
     ioctl(fd, TCSETA, &term_save);
     close(fd);
-    ioctl(fileno(stdin), TCSETA, &stdin_save);
     exit(sig);
 }
 
@@ -79,25 +78,18 @@ int toASCII(char *&out, char * in) {
 int main(int argc, char *argv[]) {
     char buffer[2048];
     int num;
-    struct termio term, tstdin;
+    struct termio term;
     if ((fd = open(DEVICE, O_RDWR | O_NDELAY)) < 0) {
         perror(DEVICE);
         exit(errno);
     }
 
     ioctl(fd, TCGETA, &term_save);
-    ioctl(fileno(stdin), TCGETA, &stdin_save);
     signal(SIGHUP, endItAll);
     signal(SIGINT, endItAll);
     signal(SIGQUIT, endItAll);
     signal(SIGTERM, endItAll);
 
-    ioctl(fileno(stdin), TCGETA, &tstdin);
-    tstdin.c_iflag = 0;
-    tstdin.c_lflag &= ~(ICANON | ECHO);
-    tstdin.c_cc[VMIN] = 0;
-    tstdin.c_cc[VTIME] = 0;
-    ioctl(fileno(stdin), TCSETA, &tstdin);
 
     ioctl(fd, TCGETA, &term);
     term.c_cflag |= CLOCAL | HUPCL;
