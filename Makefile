@@ -1,5 +1,5 @@
 SOURCES=main.cpp
-OUT_DIR=dist/
+OUT_DIR=bin/
 
 CFLAGS= -Wall
 
@@ -11,4 +11,5 @@ clean:
 
 smsread:
 	@echo "Making $@..."
+	@mkdir -p $(OUT_DIR)
 	g++ $(CFLAGS) -o $(OUT_DIR)smsread $(SOURCES)
