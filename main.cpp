@@ -53,14 +53,14 @@ int toASCII(char *&out, char * in) {
             ind = 0,
             ok = 1;
     char ret[((int) len / 4) + 1];
-    for (i = 0; i < len; i++) {
+    while (in[i + 1]) {
         ind = i;
         if (in[0] == '"') {
             ind = i - 1;
         }
 
         if (!(ind % 4)) {
-            char tmp[3], *end;
+            char tmp[5], *end;
             tmp[0] = in[i];
             tmp[1] = in[i + 1];
             tmp[2] = in[i + 2];
@@ -69,15 +69,18 @@ int toASCII(char *&out, char * in) {
             long int cnv = strtol(tmp, &end, 16);
             ret[j++] = cnv;
         }
+        i++;
     }
     ret[j] = '\0';
     out = ret;
     return ok;
 }
 
+char buffer[2048];
+
 int main(int argc, char *argv[]) {
-    char buffer[2048];
-    int num;
+
+    int num = 0xB00B;
     struct termio term;
     if ((fd = open(DEVICE, O_RDWR | O_NDELAY)) < 0) {
         perror(DEVICE);
@@ -108,7 +111,7 @@ int main(int argc, char *argv[]) {
         exit(errno);
     }
 
-    /* ... and writing*/
+    /* ... and writing */
     if ((fdw = fopen(DEVICE, "w")) == NULL) {
         perror(DEVICE);
         exit(errno);
@@ -141,19 +144,21 @@ int main(int argc, char *argv[]) {
         for (li = 0; li < j; li++) {
             if (strstr(lines[li], "+CMGL")) {
                 infi = 0;
-                char *info = strdup(lines[li]);
-                char *infoStuff[6];
-                char *from = strtok(info, ",");
+                char *infoStuff[5];
+                char *from = strtok(lines[li], ",");
                 while (from != NULL) {
                     infoStuff[infi++] = from;
                     from = strtok(NULL, ",");
                 }
-                char* phone, *msg;
+                char *phone, *msg;
                 toASCII(phone, infoStuff[2]);
                 printf("Message #%d From: %s on %s at %s\n", msgNum++, phone, infoStuff[3], infoStuff[4]);
                 toASCII(msg, lines[li + 1]);
-                puts(msg);
-                puts("\n");
+                write(fileno(stdout), msg, strlen(msg));
+                write(fileno(stdout), "\n", 1);
+                
+                //puts(msg);
+                //puts("\n");
             }
         }
         free(dup);

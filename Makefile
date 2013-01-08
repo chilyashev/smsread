@@ -1,7 +1,7 @@
 SOURCES=main.cpp
 OUT_DIR=bin/
 
-CFLAGS= -Wall
+CFLAGS= -Wall -ggdb
 
 all: $(SOURCES) clean smsread
 
